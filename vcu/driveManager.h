@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include <DFRobot_MCP2515.h>
 #include "driveManager.h"
+#include "readyToDriveSound.h"
 
 class DriveManager{
     private:
@@ -46,13 +47,15 @@ class DriveManager{
         void setSensorDiff(int diff);
 
         //Read the throttle values and drive inputs and do appropriate actions to them. To be called in loop()
-        void readDriveInput();
+        void processDriveInput(ReadyToDriveSound* r2DSound);
 
         //Set the data packets to appropriate values, and send signal via CAN BUS to the motor controller
         //this send function actually returns "CAN_OK" if send success,
         //returns "CAN_SENDMSGTIMEOUT" if timeout
         //or returns "CAN_GETTXBFTIMEOUT" if failed to get the next free buffer
-        uint8_t sendPacketToMotorController(DFRobot_MCP2515 can);
+        uint8_t sendPacketToMotorController(DFRobot_MCP2515* can);
+
+        uint8_t getDriveMode();
 };
 
 #endif

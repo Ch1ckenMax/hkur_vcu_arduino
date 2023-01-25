@@ -1,4 +1,5 @@
 #include "driveManager.h"
+#include "readyToDriveSound.h"
 #include <DFRobot_MCP2515.h>
 
 void DriveManager::setDataPacket(unsigned int torque, int angularVelocity, bool directionForward, bool inverter, bool inverterDischarge, bool speedMode, int torqueLimit) {
@@ -35,7 +36,7 @@ void DriveManager::setSensorDiff(int diff){
     this->throttleSensorDiff = diff;
 }
 
-void DriveManager::readDriveInput(){
+void DriveManager::processDriveInput(ReadyToDriveSound* r2DSound){
     //Get the values
     throttleSensorValues[0] = analogRead(throttlePinA) - throttleSensorDiff; //Take account into the difference of the two sensors
     throttleSensorValues[1] = analogRead(throttlePinB);
@@ -53,24 +54,31 @@ void DriveManager::readDriveInput(){
     //Set-up the drive mode
     if (!digitalRead(driveModePin)) {
         driveMode = DriveManager::DRIVE_MODE_DRIVE;
-        inverterEnabled = throttle >= 2; //deadzone
+        inverterEnabled = throttle >= 2; //only turn on the inverter if there is throttle signal for accelerating
         driveForward = true;
     }
     else if (!digitalRead(reverseModePin)) {
         driveMode = DriveManager::DRIVE_MODE_REVERSE;
-        inverterEnabled = throttle >= 2; //deadzone
+        inverterEnabled = throttle >= 2; //only turn on the inverter if there is throttle signal for accelerating
         driveForward = false;
     }
     else {
         driveMode = DriveManager::DRIVE_MODE_NEUTRAL;
         inverterEnabled = false;
         driveForward = true;
-        //TURN OFF BEEPING IF SHIT IS BEEPING
+
+        //Reset the ready to drive sound
+        r2DSound->turnOffIfBeeping();
+        r2DSound->setBeepState(ReadyToDriveSound::BEEP_NOT_STARTED);
     }
 
 }
 
-uint8_t DriveManager::sendPacketToMotorController(DFRobot_MCP2515 can){
+uint8_t DriveManager::sendPacketToMotorController(DFRobot_MCP2515* can){
     setDataPacket(this->throttle, 0, this->driveForward, this->inverterEnabled, !(this->inverterEnabled), false, 0);
-    return can.sendMsgBuf(0x0c0, 0, 8, motorControllerPacket); //send. 0x0c0 is defined by the docs of the motor controller
+    return can->sendMsgBuf(0x0c0, 0, 8, motorControllerPacket); //send. 0x0c0 is defined by the docs of the motor controller
+}
+
+uint8_t DriveManager::getDriveMode(){
+    return this->driveMode;
 }

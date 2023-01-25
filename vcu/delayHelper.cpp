@@ -10,11 +10,11 @@ void DelayHelper::setDelayDuration(unsigned int delayDuration){
 }
 
 void DelayHelper::startTimer(){
-    this->recordedTime = millis();
+    recordedTime = millis();
 }
 
 bool DelayHelper::checkTimer(){
-    if(millis() - this->recordedTime >= this->delayDuration){
+    if(millis() - recordedTime >= delayDuration){
       return true;
     }
     else{
