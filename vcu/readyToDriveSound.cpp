@@ -9,7 +9,7 @@ ReadyToDriveSound::ReadyToDriveSound(unsigned int beepInterval, uint8_t pinNumbe
 
 ReadyToDriveSound::~ReadyToDriveSound(){
     if(delayHelper != NULL){
-      free(delayHelper);
+        delete delayHelper;
     }
 }
 

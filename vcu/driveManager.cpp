@@ -13,12 +13,9 @@ void DriveManager::setDataPacket(unsigned int torque, int angularVelocity, bool 
     motorControllerPacket[7] = torqueLimit / 256;
 }
 
-DriveManager::DriveManager(uint8_t driveModePinNumber, uint8_t reverseModePinNumber, uint8_t throttleAPinNumber, uint8_t throttleBPinNumber, int throttleMin, int throttleMax, int maxTorque){
+DriveManager::DriveManager(uint8_t driveModePinNumber, uint8_t reverseModePinNumber, uint8_t throttleAPinNumber, uint8_t throttleBPinNumber){
     //Initialize the private variables
     for(int i = 0; i < 8; i++) this->motorControllerPacket[i] = 0;
-    this->throttleMin = throttleMin;
-    this->throttleMax = throttleMax;
-    this->maxTorque = maxTorque;
 
     //Set the pins
     this->driveModePin = driveModePinNumber;
@@ -36,13 +33,17 @@ void DriveManager::setSensorDiff(int diff){
     this->throttleSensorDiff = diff;
 }
 
-void DriveManager::processDriveInput(ReadyToDriveSound* r2DSound){
+void DriveManager::readDriveInput(){
     //Get the values
     throttleSensorValues[0] = analogRead(throttlePinA) - throttleSensorDiff; //Take account into the difference of the two sensors
     throttleSensorValues[1] = analogRead(throttlePinB);
+}
 
+void DriveManager::mapThrottle(int throttleMin, int throttleMax, int maxTorque){
     throttle = map((throttleSensorValues[0] + throttleSensorValues[1]) / 2, throttleMin, throttleMax, 0, maxTorque);
+}
 
+void DriveManager::processDriveInput(ReadyToDriveSound* r2DSound, int maxTorque){
     // Prevent overflow
     if (throttle > maxTorque) {
         throttle = maxTorque;
@@ -79,6 +80,19 @@ uint8_t DriveManager::sendPacketToMotorController(DFRobot_MCP2515* can){
     return can->sendMsgBuf(0x0c0, 0, 8, motorControllerPacket); //send. 0x0c0 is defined by the docs of the motor controller
 }
 
+uint8_t DriveManager::sendStopEnginePacket(DFRobot_MCP2515* can){
+    setDataPacket(0, 0, this->driveForward, false, true, false, 0);
+    return can->sendMsgBuf(0x0c0, 0, 8, motorControllerPacket);
+}
+
 uint8_t DriveManager::getDriveMode(){
     return this->driveMode;
+}
+
+unsigned int* DriveManager::getThrottleSensorValues(){
+    return this->throttleSensorValues;
+}
+
+long DriveManager::getThrottle(){
+    return this->throttle;
 }

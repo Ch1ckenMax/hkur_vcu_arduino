@@ -15,9 +15,6 @@ class DriveManager{
 
         unsigned int throttleSensorValues[2]; //Temporary variables to store the results of the two sensors of the throttle
         int throttleSensorDiff = 0; //difference between the two sensors
-        int maxTorque; //Max torque value to be sent to the motor controller
-        int throttleMin;
-        int throttleMax;
 
         //Container for the data packet to be sent to the motor controller
         uint8_t motorControllerPacket[8];
@@ -38,7 +35,7 @@ class DriveManager{
         const static char DRIVE_MODE_DRIVE = 2;
         
         //Constructor. Intializes variables. To be called in setup()
-        DriveManager(uint8_t driveModePinNumber, uint8_t reverseModePinNumber, uint8_t throttleAPinNumber, uint8_t throttleBPinNumber, int throttleMin, int throttleMax, int maxTorque);
+        DriveManager(uint8_t driveModePinNumber, uint8_t reverseModePinNumber, uint8_t throttleAPinNumber, uint8_t throttleBPinNumber);
 
         //Set pin modes for driveModePin and reverseModePin
         void initializePinMode();
@@ -46,8 +43,14 @@ class DriveManager{
         //Set the value difference between the two throttle sensors
         void setSensorDiff(int diff);
 
-        //Read the throttle values and drive inputs and do appropriate actions to them. To be called in loop()
-        void processDriveInput(ReadyToDriveSound* r2DSound);
+        //Read the throttle sensor values and make adjustments to them w.r.t throttleSensorDiff. To be called in loop() and before processDriveInput(ReadyToDriveSound*)
+        void readDriveInput();
+
+        //Map the sensors to the appropriate range of throttle using Arduino's built-in map()
+        void mapThrottle(int throttleMin, int throttleMax, int maxTorque);
+
+        //Do appropriate actions to the throttle value. To be called in loop()
+        void processDriveInput(ReadyToDriveSound* r2DSound, int maxTorque);
 
         //Set the data packets to appropriate values, and send signal via CAN BUS to the motor controller
         //this send function actually returns "CAN_OK" if send success,
@@ -55,7 +58,13 @@ class DriveManager{
         //or returns "CAN_GETTXBFTIMEOUT" if failed to get the next free buffer
         uint8_t sendPacketToMotorController(DFRobot_MCP2515* can);
 
+        uint8_t sendStopEnginePacket(DFRobot_MCP2515* can);
+
         uint8_t getDriveMode();
+
+        unsigned int* getThrottleSensorValues();
+
+        long getThrottle();
 };
 
 #endif
