@@ -29,11 +29,7 @@ void DriveManager::initializePinMode(){
     pinMode(reverseModePin, INPUT_PULLUP);
 }
 
-void DriveManager::setSensorDiff(int diff){
-    this->throttleSensorDiff = diff;
-}
-
-void DriveManager::readDriveInput(){
+void DriveManager::readDriveInput(int throttleSensorDiff){
     //Get the values
     throttleSensorValues[0] = analogRead(throttlePinA) - throttleSensorDiff; //Take account into the difference of the two sensors
     throttleSensorValues[1] = analogRead(throttlePinB);

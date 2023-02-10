@@ -14,7 +14,6 @@ class DriveManager{
         uint8_t throttlePinB;
 
         unsigned int throttleSensorValues[2]; //Temporary variables to store the results of the two sensors of the throttle
-        int throttleSensorDiff = 0; //difference between the two sensors
 
         //Container for the data packet to be sent to the motor controller
         uint8_t motorControllerPacket[8];
@@ -40,11 +39,8 @@ class DriveManager{
         //Set pin modes for driveModePin and reverseModePin
         void initializePinMode();
 
-        //Set the value difference between the two throttle sensors
-        void setSensorDiff(int diff);
-
-        //Read the throttle sensor values and make adjustments to them w.r.t throttleSensorDiff. To be called in loop() and before processDriveInput(ReadyToDriveSound*)
-        void readDriveInput();
+        //Read the throttle sensor values and make adjustments to them w.r.t. throttleSensorDiff. To be called in loop() and before processDriveInput(ReadyToDriveSound*)
+        void readDriveInput(int throttleSensorDiff);
 
         //Map the sensors to the appropriate range of throttle using Arduino's built-in map()
         void mapThrottle(int throttleMin, int throttleMax, int maxTorque);

@@ -16,12 +16,13 @@ const uint8_t THROTTLE_PIN_B = A1;
 const int THROTTLE_MIN = 90;
 const int THROTTLE_MAX = 700;
 const int MAX_TORQUE = 50; //Max torque value to be sent to the motor controller
+const int THROTTLE_SENSOR_DIFF = 70;
 
 //Ready to drive
-const unsigned int R2D_BEEP_INTERVAL = 1000;
+const unsigned int R2D_BEEP_INTERVAL = 2000;
 const uint8_t R2D_PIN = 8;
 
 //Safety Check
-const int IMPLAUSIBLE_TIME = 80; //ms
+const int IMPLAUSIBLE_TIME = 100; //ms
 
 #endif

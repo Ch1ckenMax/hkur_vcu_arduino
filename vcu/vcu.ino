@@ -19,7 +19,7 @@ void setup(){
     r2DSound.initializePinMode();
     
     //Set-up CAN
-    while(can.begin(CAN_BAUDRATE)){ 
+    while(can.begin(CAN_BAUDRATE) == CAN_FAILINIT){ 
         Serial.println("DFROBOT's CAN BUS Shield init fail");
         Serial.println("Please Init CAN BUS Shield again");
         delay(1000); //Retry connection every one second
@@ -28,17 +28,17 @@ void setup(){
 }
 
 void loop(){
-    driveManager.readDriveInput();
+    driveManager.readDriveInput(THROTTLE_SENSOR_DIFF);
     driveManager.mapThrottle(THROTTLE_MIN, THROTTLE_MAX, MAX_TORQUE);
 
     safetyCheck.checkImplausibility(driveManager.getThrottleSensorValues(), THROTTLE_MIN, THROTTLE_MAX, driveManager.getThrottle(), MAX_TORQUE);
     if(safetyCheck.shouldStopEngine()){
-        //Send the info the fucking dashboard
+        //Send the info to the fucking dashboard
         //Logic to be determined...
         Serial.println("Implausible state");
         driveManager.sendStopEnginePacket(&can);
         delay(100);
-        return; //Halt the program here
+        return; //Halt the function here
     }
 
     driveManager.processDriveInput(&r2DSound, MAX_TORQUE);
@@ -46,6 +46,5 @@ void loop(){
     //R2D Sound
     if(driveManager.getDriveMode() != DriveManager::DRIVE_MODE_NEUTRAL) r2DSound.checkR2D();
     
-    //Do something to the value?
     driveManager.sendPacketToMotorController(&can);
 }
