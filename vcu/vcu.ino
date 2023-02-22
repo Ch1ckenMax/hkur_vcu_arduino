@@ -28,10 +28,12 @@ void setup(){
 }
 
 void loop(){
-    driveManager.readDriveInput(THROTTLE_SENSOR_DIFF);
-    driveManager.mapThrottle(THROTTLE_MIN, THROTTLE_MAX, MAX_TORQUE);
+    driveManager.readDriveInput();
+    driveManager.mapThrottle(THROTTLE_MIN_A, THROTTLE_MAX_A, THROTTLE_MIN_B, THROTTLE_MAX_B, MAX_TORQUE);
 
-    safetyCheck.checkImplausibility(driveManager.getThrottleSensorValues(), THROTTLE_MIN, THROTTLE_MAX, driveManager.getThrottle(), MAX_TORQUE);
+    //driveManager.printData();
+
+    safetyCheck.checkImplausibility(driveManager.getThrottleSensorValues(), THROTTLE_MIN_A, THROTTLE_MAX_A, THROTTLE_MIN_B, THROTTLE_MAX_B, driveManager.getThrottle(), MAX_TORQUE);
     if(safetyCheck.shouldStopEngine()){
         //Send the info to the fucking dashboard
         //Logic to be determined...

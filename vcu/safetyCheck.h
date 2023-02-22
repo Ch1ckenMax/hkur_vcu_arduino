@@ -17,11 +17,11 @@ class SafetyCheck{
         //Check if there is a SCSFailure according to the rulebook
         //Reference: T11.9.2
         //sensorValues must be a pointer to an array of int of size 2
-        bool SCSFailure(unsigned int* sensorValues, long throttle, int maxTorque, int throttleMin, int throttleMax);
+        bool SCSFailure(unsigned int* sensorValues, long throttle, int maxTorque, int throttleMinA, int throttleMaxA, int throttleMinB, int throttleMaxB);
 
         //Check if throttle input is implausible according to rulebook
         //Reference: FSUK 2023 T11.8.8 and T11.8.9
-        bool implausible(unsigned int* sensorValues, int throttleMin, int throttleMax, long throttle, int maxTorque);
+        bool implausible(unsigned int* sensorValues, int throttleMinA, int throttleMaxA, int throttleMinB, int throttleMaxB, long throttle, int maxTorque);
     public:
         SafetyCheck(int implausibleTime);
         ~SafetyCheck();
@@ -31,7 +31,7 @@ class SafetyCheck{
 
         //Reference: FSUK2023 T11.8.8
         //sensorValues must be a pointer to an array of int of size 2
-        void checkImplausibility(unsigned int* sensorValues, int throttleMin, int throttleMax, long throttle, int maxTorque);
+        void checkImplausibility(unsigned int* sensorValues, int throttleMinA, int throttleMaxA, int throttleMinB, int throttleMaxB, long throttle, int maxTorque);
 };
 
 #endif

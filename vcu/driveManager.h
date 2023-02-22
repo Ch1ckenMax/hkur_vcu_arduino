@@ -23,6 +23,8 @@ class DriveManager{
         bool inverterEnabled = false;
         bool driveForward = true;
         long throttle = 0;
+        long throttle_A = 0;
+        long throttle_B = 0;
 
         //set the values for the data packets to be sent to motor controller
         void setDataPacket(unsigned int torque, int angularVelocity, bool directionForward, bool inverter, bool inverterDischarge, bool speedMode, int torqueLimit);
@@ -40,10 +42,10 @@ class DriveManager{
         void initializePinMode();
 
         //Read the throttle sensor values and make adjustments to them w.r.t. throttleSensorDiff. To be called in loop() and before processDriveInput(ReadyToDriveSound*)
-        void readDriveInput(int throttleSensorDiff);
+        void readDriveInput();
 
         //Map the sensors to the appropriate range of throttle using Arduino's built-in map()
-        void mapThrottle(int throttleMin, int throttleMax, int maxTorque);
+        void mapThrottle(int throttleMinA, int throttleMaxA, int throttleMinB, int throttleMaxB, int maxTorque);
 
         //Do appropriate actions to the throttle value. To be called in loop()
         void processDriveInput(ReadyToDriveSound* r2DSound, int maxTorque);
@@ -61,6 +63,8 @@ class DriveManager{
         unsigned int* getThrottleSensorValues();
 
         long getThrottle();
+
+        void printData();
 };
 
 #endif

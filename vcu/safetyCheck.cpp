@@ -2,12 +2,10 @@
 #include "delayHelper.h"
 #include <Arduino.h>
 
-bool SafetyCheck::SCSFailure(unsigned int* sensorValues, long throttle, int maxTorque, int throttleMin, int throttleMax){
+bool SafetyCheck::SCSFailure(unsigned int* sensorValues, long throttle, int maxTorque, int throttleMinA, int throttleMaxA, int throttleMinB, int throttleMaxB){
     //Check throttle input range
     //Reference: FSUK 2023 T11.9.2(c)
-    throttleMax += 100; //A little bit of buffer to make the constraints not that strict
-    throttleMin -= 100;
-    if (sensorValues[0] > throttleMax || sensorValues[1] > throttleMax || sensorValues[0] < throttleMin || sensorValues[1] < throttleMin){
+    if (sensorValues[0] > throttleMaxA + 15 || sensorValues[1] > throttleMaxB + 15 || sensorValues[0] < throttleMinA - 15 || sensorValues[1] < throttleMinB - 15){
         Serial.println("Invalid sensor values: out of range");
         return true;
     }
@@ -27,10 +25,14 @@ bool SafetyCheck::SCSFailure(unsigned int* sensorValues, long throttle, int maxT
     return false;
 }
 
-bool SafetyCheck::implausible(unsigned int* sensorValues, int throttleMin, int throttleMax, long throttle, int maxTorque){
+bool SafetyCheck::implausible(unsigned int* sensorValues, int throttleMinA, int throttleMaxA, int throttleMinB, int throttleMaxB, long throttle, int maxTorque){
     //Reference: FSUK2023 T11.8.9
-    bool hasThrottleDeviaion = (abs(sensorValues[0] - sensorValues[1]) / (float) throttleMin - throttleMax) >= 0.1 ;
-    return hasThrottleDeviaion || SCSFailure(sensorValues, throttle, maxTorque, throttleMin, throttleMax);
+    float deviation = abs(map(sensorValues[0], throttleMinA, throttleMaxA, 0, maxTorque) - map(sensorValues[1], throttleMinB, throttleMaxB, 0, maxTorque))/maxTorque;
+    bool hasThrottleDeviation = deviation >= 0.1;
+    if(hasThrottleDeviation) {
+      Serial.println("Throttle deviation larger than 10%");
+    }
+    return hasThrottleDeviation || SCSFailure(sensorValues, throttle, maxTorque, throttleMinA, throttleMaxA, throttleMinB, throttleMaxB);
 }
 
 SafetyCheck::SafetyCheck(int implausibleTime){
@@ -49,8 +51,8 @@ bool SafetyCheck::shouldStopEngine(){
     return this->engineStop;
 }
 
-void SafetyCheck::checkImplausibility(unsigned int* sensorValues, int throttleMin, int throttleMax, long throttle, int maxTorque){
-    if(!implausible(sensorValues, throttleMin, throttleMax, throttle, maxTorque)){
+void SafetyCheck::checkImplausibility(unsigned int* sensorValues, int throttleMinA, int throttleMaxA, int throttleMinB, int throttleMaxB, long throttle, int maxTorque){
+    if(!implausible(sensorValues, throttleMinA, throttleMaxA, throttleMinB, throttleMaxB, throttle, maxTorque)){
         implausibleInProgress = false;
     } //Implausible. Check if it is in the progress of implausible
     else if(implausibleInProgress){

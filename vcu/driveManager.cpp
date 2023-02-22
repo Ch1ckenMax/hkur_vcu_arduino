@@ -29,34 +29,40 @@ void DriveManager::initializePinMode(){
     pinMode(reverseModePin, INPUT_PULLUP);
 }
 
-void DriveManager::readDriveInput(int throttleSensorDiff){
+void DriveManager::readDriveInput(){
     //Get the values
-    throttleSensorValues[0] = analogRead(throttlePinA) - throttleSensorDiff; //Take account into the difference of the two sensors
+    throttleSensorValues[0] = analogRead(throttlePinA);
     throttleSensorValues[1] = analogRead(throttlePinB);
 }
 
-void DriveManager::mapThrottle(int throttleMin, int throttleMax, int maxTorque){
-    throttle = map((throttleSensorValues[0] + throttleSensorValues[1]) / 2, throttleMin, throttleMax, 0, maxTorque);
+void DriveManager::mapThrottle(int throttleMinA, int throttleMaxA, int throttleMinB, int throttleMaxB, int maxTorque){
+    throttle_A = map(throttleSensorValues[0], throttleMinA, throttleMaxA, 0, maxTorque);
+    throttle_B = map(throttleSensorValues[1], throttleMinB, throttleMaxB, 0, maxTorque);
+    throttle = (throttle_A + throttle_B) / 2;
 }
 
 void DriveManager::processDriveInput(ReadyToDriveSound* r2DSound, int maxTorque){
-    // Prevent overflow
-    if (throttle > maxTorque) {
+    // Prevent overflow and apply deadzone
+    if (throttle > maxTorque * 0.975) { //Deadzone 2.5%
         throttle = maxTorque;
     }
-    else if (throttle < 0) {
+    else if (throttle < maxTorque * 0.025) { // Deadzone 2.5%
         throttle = 0;
     }
+
+    Serial.print("Final throttle: ");
+    Serial.print(throttle);
+    Serial.print("\n");
 
     //Set-up the drive mode
     if (!digitalRead(driveModePin)) {
         driveMode = DriveManager::DRIVE_MODE_DRIVE;
-        inverterEnabled = throttle >= 2; //only turn on the inverter if there is throttle signal for accelerating
+        inverterEnabled = throttle >= maxTorque * 0.025; //only turn on the inverter if there is throttle signal for accelerating
         driveForward = true;
     }
     else if (!digitalRead(reverseModePin)) {
         driveMode = DriveManager::DRIVE_MODE_REVERSE;
-        inverterEnabled = throttle >= 2; //only turn on the inverter if there is throttle signal for accelerating
+        inverterEnabled = throttle >= maxTorque * 0.025; //only turn on the inverter if there is throttle signal for accelerating
         driveForward = false;
     }
     else {
@@ -91,4 +97,18 @@ unsigned int* DriveManager::getThrottleSensorValues(){
 
 long DriveManager::getThrottle(){
     return this->throttle;
+}
+
+void DriveManager::printData(){
+      Serial.print("Sensor A: ");
+      Serial.print(this->throttleSensorValues[0]);
+      Serial.print(". Sensor B: ");
+      Serial.print(this->throttleSensorValues[1]);
+      Serial.print(". Throttle A: ");
+      Serial.print(this->throttle_A);
+      Serial.print(". Throttle B: ");
+      Serial.print(this->throttle_B);
+      Serial.print(". Throttle: ");
+      Serial.print(this->throttle);
+      Serial.print("\n");
 }
