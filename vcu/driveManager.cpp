@@ -43,10 +43,10 @@ void DriveManager::mapThrottle(int throttleMinA, int throttleMaxA, int throttleM
 
 void DriveManager::processDriveInput(ReadyToDriveSound* r2DSound, int maxTorque){
     // Prevent overflow and apply deadzone
-    if (throttle > maxTorque * 0.975) { //Deadzone 2.5%
+    if (throttle > maxTorque * 0.99) { //Deadzone 2.5%
         throttle = maxTorque;
     }
-    else if (throttle < maxTorque * 0.025) { // Deadzone 2.5%
+    else if (throttle < maxTorque * 0.005) { // Deadzone 2.5%
         throttle = 0;
     }
 
@@ -61,12 +61,12 @@ void DriveManager::processDriveInput(ReadyToDriveSound* r2DSound, int maxTorque)
     //Set-up the drive mode
     if (!digitalRead(driveModePin)) {
         driveMode = DriveManager::DRIVE_MODE_DRIVE;
-        inverterEnabled = throttle >= maxTorque * 0.025; //only turn on the inverter if there is throttle signal for accelerating
+        inverterEnabled = throttle >= maxTorque * 0.005; //only turn on the inverter if there is throttle signal for accelerating
         driveForward = true;
     }
     else if (!digitalRead(reverseModePin)) {
         driveMode = DriveManager::DRIVE_MODE_REVERSE;
-        inverterEnabled = throttle >= maxTorque * 0.025; //only turn on the inverter if there is throttle signal for accelerating
+        inverterEnabled = throttle >= maxTorque * 0.005; //only turn on the inverter if there is throttle signal for accelerating
         driveForward = false;
     }
     else {

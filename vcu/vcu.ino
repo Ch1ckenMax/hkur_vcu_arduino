@@ -31,7 +31,7 @@ void loop(){
     driveManager.readDriveInput();
     driveManager.mapThrottle(THROTTLE_MIN_A, THROTTLE_MAX_A, THROTTLE_MIN_B, THROTTLE_MAX_B, MAX_TORQUE);
 
-    //driveManager.printData();
+    driveManager.printData();
 
     safetyCheck.checkImplausibility(driveManager.getThrottleSensorValues(), THROTTLE_MIN_A, THROTTLE_MAX_A, THROTTLE_MIN_B, THROTTLE_MAX_B, driveManager.getThrottle(), MAX_TORQUE);
     if(safetyCheck.shouldStopEngine()){
