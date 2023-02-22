@@ -5,7 +5,7 @@
 bool SafetyCheck::SCSFailure(unsigned int* sensorValues, long throttle, int maxTorque, int throttleMinA, int throttleMaxA, int throttleMinB, int throttleMaxB){
     //Check throttle input range
     //Reference: FSUK 2023 T11.9.2(c)
-    if (sensorValues[0] > throttleMaxA + 15 || sensorValues[1] > throttleMaxB + 15 || sensorValues[0] < throttleMinA - 15 || sensorValues[1] < throttleMinB - 15){
+    if (sensorValues[0] > throttleMaxA + 40 || sensorValues[1] > throttleMaxB + 40 || sensorValues[0] < throttleMinA - 40 || sensorValues[1] < throttleMinB - 40){
         Serial.println("Invalid sensor values: out of range");
         return true;
     }
@@ -17,6 +17,7 @@ bool SafetyCheck::SCSFailure(unsigned int* sensorValues, long throttle, int maxT
         Serial.println("Data corruption: big sudden change in throttle input");
         return true;
     }
+    previousThrottleValue = throttle;
 
     //Check loss or delay of message
     //Probably need to configure the motor controller to send message to acknowledge the receive of message?

@@ -44,8 +44,9 @@ void loop(){
     }
 
     driveManager.processDriveInput(&r2DSound, MAX_TORQUE);
-
     //R2D Sound
+
+
     if(driveManager.getDriveMode() != DriveManager::DRIVE_MODE_NEUTRAL) r2DSound.checkR2D();
     
     driveManager.sendPacketToMotorController(&can);

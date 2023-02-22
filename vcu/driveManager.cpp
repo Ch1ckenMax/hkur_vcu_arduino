@@ -53,6 +53,10 @@ void DriveManager::processDriveInput(ReadyToDriveSound* r2DSound, int maxTorque)
     Serial.print("Final throttle: ");
     Serial.print(throttle);
     Serial.print("\n");
+    
+    //Serial.print(digitalRead(driveModePin));
+    //Serial.print(digitalRead(reverseModePin));
+    //Serial.print("\n");
 
     //Set-up the drive mode
     if (!digitalRead(driveModePin)) {
