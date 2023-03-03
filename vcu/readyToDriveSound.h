@@ -9,7 +9,7 @@ class ReadyToDriveSound{
       uint8_t beepPin;
       unsigned int beepInterval;
       uint8_t beepState = ReadyToDriveSound::BEEP_NOT_STARTED;
-      DelayHelper* delayHelper;
+      DelayHelper delayHelper;
 
     public:
       //Constants
@@ -19,9 +19,6 @@ class ReadyToDriveSound{
 
       //
       ReadyToDriveSound(unsigned int beepInterval, uint8_t pinNumber);
-
-      //Free memory for the delayHelper when this class is out of scope and destructed
-      ~ReadyToDriveSound();
 
       uint8_t getBeepState();
 

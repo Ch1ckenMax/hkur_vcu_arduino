@@ -26,4 +26,8 @@ const uint8_t R2D_PIN = 8;
 //Safety Check
 const int IMPLAUSIBLE_TIME = 100; //ms
 
+//Filter
+const int FILTER_FREQ = 500;
+const int MAW_SIZE = 10;
+
 #endif

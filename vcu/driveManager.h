@@ -4,6 +4,7 @@
 #include <DFRobot_MCP2515.h>
 #include "driveManager.h"
 #include "readyToDriveSound.h"
+#include "filter.h"
 
 class DriveManager{
     private:
@@ -12,6 +13,12 @@ class DriveManager{
         uint8_t reverseModePin;
         uint8_t throttlePinA;
         uint8_t throttlePinB;
+
+        int throttleMinA;
+        int throttleMinB;
+        int throttleMaxA;
+        int throttleMaxB;
+        int maxTorque;
 
         unsigned int throttleSensorValues[2]; //Temporary variables to store the results of the two sensors of the throttle
 
@@ -28,6 +35,10 @@ class DriveManager{
 
         //set the values for the data packets to be sent to motor controller
         void setDataPacket(unsigned int torque, int angularVelocity, bool directionForward, bool inverter, bool inverterDischarge, bool speedMode, int torqueLimit);
+
+        //filter
+        Filter* filterA;
+        Filter* filterB;
     
     public:
         //Drive Mode Constants (using char to save memory space)
@@ -35,9 +46,12 @@ class DriveManager{
         const static char DRIVE_MODE_NEUTRAL = 1;
         const static char DRIVE_MODE_DRIVE = 2;
         
-        //Constructor. Intializes variables. To be called in setup()
-        DriveManager(uint8_t driveModePinNumber, uint8_t reverseModePinNumber, uint8_t throttleAPinNumber, uint8_t throttleBPinNumber);
+        //Constructor for drive manager that uses moving average filter. Intializes variables. To be called in setup()
+        DriveManager(uint8_t driveModePinNumber, uint8_t reverseModePinNumber, uint8_t throttleAPinNumber, uint8_t throttleBPinNumber, int throttleMinA, int throttleMinB, int throttleMaxA, int throttleMaxB, int maxTorque, int filterFreq, uint8_t windowSize);
 
+        //Free memory
+        ~DriveManager();
+       
         //Set pin modes for driveModePin and reverseModePin
         void initializePinMode();
 
@@ -45,10 +59,10 @@ class DriveManager{
         void readDriveInput();
 
         //Map the sensors to the appropriate range of throttle using Arduino's built-in map()
-        void mapThrottle(int throttleMinA, int throttleMaxA, int throttleMinB, int throttleMaxB, int maxTorque);
+        void mapThrottle();
 
         //Do appropriate actions to the throttle value. To be called in loop()
-        void processDriveInput(ReadyToDriveSound* r2DSound, int maxTorque);
+        void processDriveInput(ReadyToDriveSound* r2DSound);
 
         //Set the data packets to appropriate values, and send signal via CAN BUS to the motor controller
         //this send function actually returns "CAN_OK" if send success,

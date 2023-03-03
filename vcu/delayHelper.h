@@ -11,7 +11,6 @@ class DelayHelper{
       unsigned int delayDuration = 0;
 
     public:
-      DelayHelper(unsigned int delayDuration);
       void setDelayDuration(unsigned int delayDuration);
 
       //Record the current time to the timer

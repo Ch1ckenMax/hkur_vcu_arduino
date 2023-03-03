@@ -8,7 +8,7 @@ class SafetyCheck{
     private:
         int implausibleTime;
 
-        DelayHelper* delayHelper;
+        DelayHelper delayHelper;
         bool engineStop = false;
         bool implausibleInProgress = false;
         long previousThrottleValue = 0;
@@ -24,8 +24,6 @@ class SafetyCheck{
         bool implausible(unsigned int* sensorValues, int throttleMinA, int throttleMaxA, int throttleMinB, int throttleMaxB, long throttle, int maxTorque);
     public:
         SafetyCheck(int implausibleTime);
-        ~SafetyCheck();
-
 
         bool shouldStopEngine();
 

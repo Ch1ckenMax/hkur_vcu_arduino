@@ -1,10 +1,6 @@
 #include <Arduino.h>
 #include "delayHelper.h"
 
-DelayHelper::DelayHelper(unsigned int delayDuration){
-    this->delayDuration = delayDuration;
-}
-
 void DelayHelper::setDelayDuration(unsigned int delayDuration){
     this->delayDuration = delayDuration;
 }

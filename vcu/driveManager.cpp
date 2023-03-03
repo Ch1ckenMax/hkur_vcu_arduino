@@ -1,5 +1,6 @@
 #include "driveManager.h"
 #include "readyToDriveSound.h"
+#include "filter.h"
 #include <DFRobot_MCP2515.h>
 
 void DriveManager::setDataPacket(unsigned int torque, int angularVelocity, bool directionForward, bool inverter, bool inverterDischarge, bool speedMode, int torqueLimit) {
@@ -13,7 +14,7 @@ void DriveManager::setDataPacket(unsigned int torque, int angularVelocity, bool 
     motorControllerPacket[7] = torqueLimit / 256;
 }
 
-DriveManager::DriveManager(uint8_t driveModePinNumber, uint8_t reverseModePinNumber, uint8_t throttleAPinNumber, uint8_t throttleBPinNumber){
+DriveManager::DriveManager(uint8_t driveModePinNumber, uint8_t reverseModePinNumber, uint8_t throttleAPinNumber, uint8_t throttleBPinNumber, int throttleMinA, int throttleMinB, int throttleMaxA, int throttleMaxB, int maxTorque, int filterFreq, uint8_t windowSize){
     //Initialize the private variables
     for(int i = 0; i < 8; i++) this->motorControllerPacket[i] = 0;
 
@@ -22,6 +23,28 @@ DriveManager::DriveManager(uint8_t driveModePinNumber, uint8_t reverseModePinNum
     this->reverseModePin = reverseModePinNumber;
     this->throttlePinA = throttleAPinNumber;
     this->throttlePinB = throttleBPinNumber;   
+    
+    this->throttleMinA = throttleMinA;
+    this->throttleMinB = throttleMinB;
+    this->throttleMaxA = throttleMaxA;
+    this->throttleMaxB = throttleMaxB;
+    this->maxTorque = maxTorque;
+
+    //Setting moving average filter for the throttle input
+    this->filterA = new MovingAVGFilter(windowSize, filterFreq);
+    this->filterB = new MovingAVGFilter(windowSize, filterFreq);
+
+    filterA->resetFilter(throttleMinA);
+    filterB->resetFilter(throttleMinB);  
+}
+
+DriveManager::~DriveManager(){
+    if(this->filterA != NULL){
+        delete this->filterA;
+    }
+    if(this->filterB != NULL){
+        delete this->filterB;
+    }
 }
 
 void DriveManager::initializePinMode(){
@@ -33,20 +56,24 @@ void DriveManager::readDriveInput(){
     //Get the values
     throttleSensorValues[0] = analogRead(throttlePinA);
     throttleSensorValues[1] = analogRead(throttlePinB);
+
+    //Feed the data into the filter
+    this->filterA->feedData(throttleSensorValues[0]);
+    this->filterB->feedData(throttleSensorValues[1]);
 }
 
-void DriveManager::mapThrottle(int throttleMinA, int throttleMaxA, int throttleMinB, int throttleMaxB, int maxTorque){
-    throttle_A = map(throttleSensorValues[0], throttleMinA, throttleMaxA, 0, maxTorque);
-    throttle_B = map(throttleSensorValues[1], throttleMinB, throttleMaxB, 0, maxTorque);
+void DriveManager::mapThrottle(){
+    throttle_A = map(this->filterA->getResult(), throttleMinA, throttleMaxA, 0, maxTorque); //use filtered result
+    throttle_B = map(this->filterB->getResult(), throttleMinB, throttleMaxB, 0, maxTorque);
     throttle = (throttle_A + throttle_B) / 2;
 }
 
-void DriveManager::processDriveInput(ReadyToDriveSound* r2DSound, int maxTorque){
+void DriveManager::processDriveInput(ReadyToDriveSound* r2DSound){
     // Prevent overflow and apply deadzone
-    if (throttle > maxTorque * 0.99) { //Deadzone 2.5%
+    if (throttle > maxTorque * 0.99) { //Deadzone at most 2.5%
         throttle = maxTorque;
     }
-    else if (throttle < maxTorque * 0.005) { // Deadzone 2.5%
+    else if (throttle < maxTorque * 0.005) { // Deadzone at most 2.5%
         throttle = 0;
     }
 
@@ -63,6 +90,10 @@ void DriveManager::processDriveInput(ReadyToDriveSound* r2DSound, int maxTorque)
         driveMode = DriveManager::DRIVE_MODE_DRIVE;
         inverterEnabled = throttle >= maxTorque * 0.005; //only turn on the inverter if there is throttle signal for accelerating
         driveForward = true;
+
+        //Reset filter
+        filterA->resetFilter(throttleMinA);
+        filterB->resetFilter(throttleMinB);
     }
     else if (!digitalRead(reverseModePin)) {
         driveMode = DriveManager::DRIVE_MODE_REVERSE;
