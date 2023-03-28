@@ -34,6 +34,10 @@ int MovingAVGFilter::getResult(){
     int sum = 0;
     for(int i = 0; i < windowSize; i++){
         sum += window[i];
+
+        //DEBUG
+        //Serial.print(window[i]);
+        //Serial.print(" ");
     }
 
     return sum / windowSize;

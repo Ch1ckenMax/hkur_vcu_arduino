@@ -78,6 +78,8 @@ class DriveManager{
 
         long getThrottle();
 
+        //Do NOT use this function in production. This is ONLY for debugging purpose
+        //Serial print for some reason takes a lot of time to run. This function may make the throttle very unresponsive!
         void printData();
 };
 

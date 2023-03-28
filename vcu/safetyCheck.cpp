@@ -19,10 +19,6 @@ bool SafetyCheck::SCSFailure(unsigned int* sensorValues, long throttle, int maxT
     }
     previousThrottleValue = throttle;
 
-    //Check loss or delay of message
-    //Probably need to configure the motor controller to send message to acknowledge the receive of message?
-    //Or probably has to be done in the motor controller
-
     return false;
 }
 

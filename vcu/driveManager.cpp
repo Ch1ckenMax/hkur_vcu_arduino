@@ -63,6 +63,8 @@ void DriveManager::readDriveInput(){
 }
 
 void DriveManager::mapThrottle(){
+    
+    
     throttle_A = map(this->filterA->getResult(), throttleMinA, throttleMaxA, 0, maxTorque); //use filtered result
     throttle_B = map(this->filterB->getResult(), throttleMinB, throttleMaxB, 0, maxTorque);
     throttle = (throttle_A + throttle_B) / 2;
@@ -73,13 +75,13 @@ void DriveManager::processDriveInput(ReadyToDriveSound* r2DSound){
     if (throttle > maxTorque * 0.99) { //Deadzone at most 2.5%
         throttle = maxTorque;
     }
-    else if (throttle < maxTorque * 0.005) { // Deadzone at most 2.5%
+    else if (throttle < maxTorque * 0.05) { // Deadzone at most 2.5%
         throttle = 0;
     }
 
-    Serial.print("Final throttle: ");
+    //Serial.print("Final throttle: ");
     Serial.print(throttle);
-    Serial.print("\n");
+    Serial.print(" ");
     
     //Serial.print(digitalRead(driveModePin));
     //Serial.print(digitalRead(reverseModePin));
@@ -137,8 +139,12 @@ long DriveManager::getThrottle(){
 void DriveManager::printData(){
       Serial.print("Sensor A: ");
       Serial.print(this->throttleSensorValues[0]);
-      Serial.print(". Sensor B: ");
+      Serial.print("Sensor B: ");
       Serial.print(this->throttleSensorValues[1]);
+      //Serial.print(". Filtered Sensor A: ");
+      //Serial.print(this->filterA->getResult());
+      //Serial.print(". Filtered Sensor B: ");
+      //Serial.print(this->filterB->getResult());
       Serial.print(". Throttle A: ");
       Serial.print(this->throttle_A);
       Serial.print(". Throttle B: ");

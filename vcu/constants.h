@@ -13,10 +13,10 @@ const uint8_t REVERSE_MODE_PIN = 5;
 const uint8_t THROTTLE_PIN_A = A0;
 const uint8_t THROTTLE_PIN_B = A1;
 
-const int THROTTLE_MIN_A = 548;
-const int THROTTLE_MIN_B = 138;
-const int THROTTLE_MAX_A = 790;
-const int THROTTLE_MAX_B = 545;
+const int THROTTLE_MIN_A = 547;
+const int THROTTLE_MIN_B = 612;
+const int THROTTLE_MAX_A = 860;
+const int THROTTLE_MAX_B = 920;
 const int MAX_TORQUE = 1660; //Max torque value to be sent to the motor controller
 
 //Ready to drive
@@ -27,7 +27,7 @@ const uint8_t R2D_PIN = 8;
 const int IMPLAUSIBLE_TIME = 100; //ms
 
 //Filter
-const int FILTER_FREQ = 500;
-const int MAW_SIZE = 10;
+const int FILTER_FREQ = 333;
+const int MAW_SIZE = 4;
 
 #endif
