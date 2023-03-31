@@ -43,3 +43,33 @@ int MovingAVGFilter::getResult(){
     return sum / windowSize;
 }
 
+void doNothingFilter::resetFilter(int value){
+    this->value = value;
+}
+
+void doNothingFilter::feedData(int value){
+    this->value = value;
+}
+
+int doNothingFilter::getResult(){
+    return this->value;
+}
+
+ExponentialFilter::ExponentialFilter(float newDataWeight){
+    this->newDataWeight = newDataWeight;
+}
+
+void ExponentialFilter::resetFilter(int value){
+    this->result = value;
+}
+
+void ExponentialFilter::feedData(int value){
+    float oldDataWeight = (1 - this->newDataWeight);
+    this->result = (oldDataWeight * this->result) + (this->newDataWeight * value);
+ }
+int ExponentialFilter::getResult(){
+    return this->result;
+}
+
+
+

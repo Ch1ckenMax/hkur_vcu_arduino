@@ -45,4 +45,29 @@ class MovingAVGFilter: public Filter{
 
 };
 
+class ExponentialFilter: public Filter{
+    private:
+        float newDataWeight;
+        int result;
+    
+    public:
+      ExponentialFilter(float newDataWeight);
+
+      virtual void resetFilter(int value);
+
+      virtual void feedData(int value);
+
+      virtual int getResult();
+};
+
+class doNothingFilter: public Filter{
+    private:
+        int value;
+    
+    public:
+        virtual void resetFilter(int value);
+        virtual void feedData(int value);
+        virtual int getResult();
+};
+
 #endif

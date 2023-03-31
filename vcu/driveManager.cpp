@@ -14,7 +14,7 @@ void DriveManager::setDataPacket(unsigned int torque, int angularVelocity, bool 
     motorControllerPacket[7] = torqueLimit / 256;
 }
 
-DriveManager::DriveManager(uint8_t driveModePinNumber, uint8_t reverseModePinNumber, uint8_t throttleAPinNumber, uint8_t throttleBPinNumber, int throttleMinA, int throttleMinB, int throttleMaxA, int throttleMaxB, int maxTorque, int filterFreq, uint8_t windowSize){
+DriveManager::DriveManager(uint8_t driveModePinNumber, uint8_t reverseModePinNumber, uint8_t throttleAPinNumber, uint8_t throttleBPinNumber, int throttleMinA, int throttleMinB, int throttleMaxA, int throttleMaxB, int maxTorque, int filterFreq, uint8_t windowSize, float newDataWeight, int filterChoice){
     //Initialize the private variables
     for(int i = 0; i < 8; i++) this->motorControllerPacket[i] = 0;
 
@@ -30,12 +30,27 @@ DriveManager::DriveManager(uint8_t driveModePinNumber, uint8_t reverseModePinNum
     this->throttleMaxB = throttleMaxB;
     this->maxTorque = maxTorque;
 
-    //Setting moving average filter for the throttle input
-    this->filterA = new MovingAVGFilter(windowSize, filterFreq);
-    this->filterB = new MovingAVGFilter(windowSize, filterFreq);
-
+  
+    switch(filterChoice){
+      case FILTER_DISABLED:
+          this->filterA = new doNothingFilter();
+          this->filterB = new doNothingFilter();
+          break;
+      case FILTER_MOVING_AVG: //Setting moving average filter for the throttle input
+          this->filterA = new MovingAVGFilter(windowSize, filterFreq);
+          this->filterB = new MovingAVGFilter(windowSize, filterFreq);
+          break;
+      case FILTER_EXPONENTIAL:
+          this->filterA = new ExponentialFilter(newDataWeight);
+          this->filterB = new ExponentialFilter(newDataWeight);
+          break;
+      default:
+          Serial.print("Invalid filter!");
+          break;
+    }
     filterA->resetFilter(throttleMinA);
     filterB->resetFilter(throttleMinB);  
+
 }
 
 DriveManager::~DriveManager(){
@@ -72,10 +87,10 @@ void DriveManager::mapThrottle(){
 
 void DriveManager::processDriveInput(ReadyToDriveSound* r2DSound){
     // Prevent overflow and apply deadzone
-    if (throttle > maxTorque * 0.99) { //Deadzone at most 2.5%
+    if (throttle > maxTorque * 0.985) { //Deadzone at most 2.5%
         throttle = maxTorque;
     }
-    else if (throttle < maxTorque * 0.05) { // Deadzone at most 2.5%
+    else if (throttle < maxTorque * 0.015) { // Deadzone at most 2.5%
         throttle = 0;
     }
 
@@ -139,7 +154,7 @@ long DriveManager::getThrottle(){
 void DriveManager::printData(){
       Serial.print("Sensor A: ");
       Serial.print(this->throttleSensorValues[0]);
-      Serial.print("Sensor B: ");
+      Serial.print(". Sensor B: ");
       Serial.print(this->throttleSensorValues[1]);
       //Serial.print(". Filtered Sensor A: ");
       //Serial.print(this->filterA->getResult());

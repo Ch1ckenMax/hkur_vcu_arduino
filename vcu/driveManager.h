@@ -37,6 +37,8 @@ class DriveManager{
         void setDataPacket(unsigned int torque, int angularVelocity, bool directionForward, bool inverter, bool inverterDischarge, bool speedMode, int torqueLimit);
 
         //filter
+        int filterChoice;
+
         Filter* filterA;
         Filter* filterB;
     
@@ -45,9 +47,14 @@ class DriveManager{
         const static char DRIVE_MODE_REVERSE = 0;
         const static char DRIVE_MODE_NEUTRAL = 1;
         const static char DRIVE_MODE_DRIVE = 2;
+
+        //Low-pass filter choice
+        const static char FILTER_DISABLED = 0;
+        const static char FILTER_MOVING_AVG = 1;
+        const static char FILTER_EXPONENTIAL = 2;
         
         //Constructor for drive manager that uses moving average filter. Intializes variables. To be called in setup()
-        DriveManager(uint8_t driveModePinNumber, uint8_t reverseModePinNumber, uint8_t throttleAPinNumber, uint8_t throttleBPinNumber, int throttleMinA, int throttleMinB, int throttleMaxA, int throttleMaxB, int maxTorque, int filterFreq, uint8_t windowSize);
+        DriveManager(uint8_t driveModePinNumber, uint8_t reverseModePinNumber, uint8_t throttleAPinNumber, uint8_t throttleBPinNumber, int throttleMinA, int throttleMinB, int throttleMaxA, int throttleMaxB, int maxTorque, int filterFreq, uint8_t windowSize, float newDataWeight, int filterChoice);
 
         //Free memory
         ~DriveManager();
