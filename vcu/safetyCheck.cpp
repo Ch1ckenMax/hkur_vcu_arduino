@@ -19,10 +19,6 @@ bool SafetyCheck::SCSFailure(unsigned int* sensorValues, long throttle, int maxT
     }
     previousThrottleValue = throttle;
 
-    //Check loss or delay of message
-    //Probably need to configure the motor controller to send message to acknowledge the receive of message?
-    //Or probably has to be done in the motor controller
-
     return false;
 }
 
@@ -38,14 +34,7 @@ bool SafetyCheck::implausible(unsigned int* sensorValues, int throttleMinA, int 
 
 SafetyCheck::SafetyCheck(int implausibleTime){
     this->implausibleTime = implausibleTime;
-    this->delayHelper = new DelayHelper(this->implausibleTime);
-}
-
-SafetyCheck::~SafetyCheck(){
-    //Free memory automatically
-    if(delayHelper != NULL){
-        delete delayHelper;
-    }
+    delayHelper.setDelayDuration(this->implausibleTime);
 }
 
 bool SafetyCheck::shouldStopEngine(){
@@ -58,12 +47,12 @@ void SafetyCheck::checkImplausibility(unsigned int* sensorValues, int throttleMi
     } //Implausible. Check if it is in the progress of implausible
     else if(implausibleInProgress){
         //If the input is considered to be implausible for more than the time specified in implausibleTime, shall stop the engine.
-        if(delayHelper->checkTimer()){
+        if(delayHelper.checkTimer()){
             engineStop = true;
         }
     }
     else{ //Starting to be implausible, start the timer in the delay helper
         implausibleInProgress = true;
-        delayHelper->startTimer();
+        delayHelper.startTimer();
     }
 }

@@ -6,7 +6,7 @@
 
 //Class variables
 DFRobot_MCP2515 can(csPIN);
-DriveManager driveManager(DRIVE_MODE_PIN, REVERSE_MODE_PIN, THROTTLE_PIN_A, THROTTLE_PIN_B);
+DriveManager driveManager(DRIVE_MODE_PIN, REVERSE_MODE_PIN, THROTTLE_PIN_A, THROTTLE_PIN_B, THROTTLE_MIN_A, THROTTLE_MIN_B, THROTTLE_MAX_A, THROTTLE_MAX_B, MAX_TORQUE, FILTER_FREQ, MAW_SIZE, NEW_DATA_WEIGHT, FILTER_CHOICE);
 ReadyToDriveSound r2DSound(R2D_BEEP_INTERVAL, R2D_PIN);
 SafetyCheck safetyCheck(IMPLAUSIBLE_TIME);
 
@@ -28,10 +28,12 @@ void setup(){
 }
 
 void loop(){
+    unsigned long latencyCheck = millis(); //Check the latency of each iteration of the loop
+  
     driveManager.readDriveInput();
-    driveManager.mapThrottle(THROTTLE_MIN_A, THROTTLE_MAX_A, THROTTLE_MIN_B, THROTTLE_MAX_B, MAX_TORQUE);
+    driveManager.mapThrottle();
 
-    driveManager.printData();
+    //driveManager.printData();
 
     safetyCheck.checkImplausibility(driveManager.getThrottleSensorValues(), THROTTLE_MIN_A, THROTTLE_MAX_A, THROTTLE_MIN_B, THROTTLE_MAX_B, driveManager.getThrottle(), MAX_TORQUE);
     if(safetyCheck.shouldStopEngine()){
@@ -43,11 +45,15 @@ void loop(){
         return; //Halt the function here
     }
 
-    driveManager.processDriveInput(&r2DSound, MAX_TORQUE);
+    driveManager.processDriveInput(&r2DSound);
     //R2D Sound
 
 
     if(driveManager.getDriveMode() != DriveManager::DRIVE_MODE_NEUTRAL) r2DSound.checkR2D();
-    
+
     driveManager.sendPacketToMotorController(&can);
+
+    //Check Latency
+    //Serial.print("Latency step 1: ");
+    Serial.println(millis() - latencyCheck);
 }
