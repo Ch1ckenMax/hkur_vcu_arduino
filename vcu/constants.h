@@ -20,6 +20,8 @@ const int THROTTLE_MAX_A = 850;
 const int THROTTLE_MAX_B = 920;
 const int MAX_TORQUE = 1660; //Max torque value to be sent to the motor controller
 
+const char OUTPUT_MODE = DriveManager::OUTPUT_TORQUE; //Choices: DriveManager::OUTPUT_TORQUE, DriveManager::OUTPUT_SPEED
+
 //Ready to drive
 const unsigned int R2D_BEEP_INTERVAL = 2000;
 const uint8_t R2D_PIN = 8;

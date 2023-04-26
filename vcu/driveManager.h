@@ -52,6 +52,10 @@ class DriveManager{
         const static char FILTER_DISABLED = 0;
         const static char FILTER_MOVING_AVG = 1;
         const static char FILTER_EXPONENTIAL = 2;
+
+        //Output Mode
+        const static char OUTPUT_TORQUE = 0;
+        const static char OUTPUT_SPEED = 1;
         
         //Constructor for drive manager that uses moving average filter. Intializes variables. To be called in setup()
         DriveManager(uint8_t driveModePinNumber, uint8_t reverseModePinNumber, uint8_t throttleAPinNumber, uint8_t throttleBPinNumber, int throttleMinA, int throttleMinB, int throttleMaxA, int throttleMaxB, int maxTorque, int filterFreq, uint8_t windowSize, float newDataWeight, int filterChoice);
@@ -75,7 +79,7 @@ class DriveManager{
         //this send function actually returns "CAN_OK" if send success,
         //returns "CAN_SENDMSGTIMEOUT" if timeout
         //or returns "CAN_GETTXBFTIMEOUT" if failed to get the next free buffer
-        uint8_t sendPacketToMotorController(DFRobot_MCP2515* can);
+        virtual uint8_t sendPacketToMotorController(DFRobot_MCP2515* can, int outputMode);
 
         uint8_t sendStopEnginePacket(DFRobot_MCP2515* can);
 
@@ -89,5 +93,6 @@ class DriveManager{
         //Serial print for some reason takes a lot of time to run. This function may make the throttle very unresponsive!
         void printData();
 };
+
 
 #endif

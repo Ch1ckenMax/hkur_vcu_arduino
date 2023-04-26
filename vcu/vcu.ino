@@ -51,7 +51,7 @@ void loop(){
 
     if(driveManager.getDriveMode() != DriveManager::DRIVE_MODE_NEUTRAL) r2DSound.checkR2D();
 
-    driveManager.sendPacketToMotorController(&can);
+    driveManager.sendPacketToMotorController(&can, OUTPUT_MODE);
 
     //Check Latency
     //Serial.print("Latency step 1: ");

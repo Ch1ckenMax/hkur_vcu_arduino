@@ -129,8 +129,13 @@ void DriveManager::processDriveInput(ReadyToDriveSound* r2DSound){
 
 }
 
-uint8_t DriveManager::sendPacketToMotorController(DFRobot_MCP2515* can){
-    setDataPacket(this->throttle, 0, this->driveForward, this->inverterEnabled, !(this->inverterEnabled), false, 0);
+uint8_t DriveManager::sendPacketToMotorController(DFRobot_MCP2515* can, int outputMode){
+    if(outputMode == DriveManager::OUTPUT_TORQUE)
+      setDataPacket(this->throttle, 0, this->driveForward, this->inverterEnabled, !(this->inverterEnabled), false, 0);
+    else if(outputMode == DriveManager::OUTPUT_SPEED)
+      setDataPacket(0, this->throttle, this->driveForward, this->inverterEnabled, !(this->inverterEnabled), false, 0);
+    else
+      setDataPacket(0, 0, this->driveForward, false, true, false, 0); //Invalid choice      
     return can->sendMsgBuf(0x0c0, 0, 8, motorControllerPacket); //send. 0x0c0 is defined by the docs of the motor controller
 }
 
